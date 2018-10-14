@@ -3,3 +3,6 @@ env/
 
 #Flask configurations
 instance/
+
+#Vscode files
+.vscode/
