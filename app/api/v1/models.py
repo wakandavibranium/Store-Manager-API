@@ -46,3 +46,41 @@ class ProductModel:
             minimum_inventory_quantity=self.minimum_inventory_quantity,
             price=self.price
         )
+
+
+class SaleModel:
+    """The class contains details of sales"""
+
+    # unique identifier
+    sale_id = 1
+
+    # list of sales
+    sales = []
+
+    def __init__(
+            self,
+            number_of_items_sold,
+            transaction_amount,
+            date_created,
+            created_by):
+        """Initialize class constructor with sales details"""
+
+        self.id = SaleModel.sale_id
+        self.number_of_items_sold = number_of_items_sold
+        self.transaction_amount = transaction_amount
+        self.date_created = date_created
+        self.created_by = created_by
+
+        # Increment sale_id by 1 every time this class is instantiated
+        SaleModel.sale_id += 1
+
+    def get_sale_details(self):
+        """Return the sale as a dictionary"""
+
+        return dict(
+            id=self.id,
+            number_of_items_sold=self.number_of_items_sold,
+            transaction_amount=self.transaction_amount,
+            date_created=self.date_created,
+            created_by=self.created_by
+        )
