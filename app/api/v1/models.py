@@ -25,6 +25,16 @@ class ProductModel:
         # Increment product_id by 1 every time this class is instantiated
         ProductModel.product_id += 1
 
+    @classmethod
+    def get_a_product_by_id(cls, id):
+        """Get a single product"""
+
+        # Loop through the list of products
+        for product in cls.products:
+            # Check if the product id supplied exists
+            if id == product.id:
+                return product
+
     def get_product_details(self):
         """Return the product as a dictionary"""
 
