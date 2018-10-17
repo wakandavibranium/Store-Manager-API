@@ -16,9 +16,9 @@ class SaleTestCase(unittest.TestCase):
         self.client = self.app.test_client()
         self.content_type = "application/json"
         self.sale = {
-            'number_of_items_sold': 12,
-            'transaction_amount': 34000,
-            'date_created': datetime.now,
+            "number_of_items_sold": 12,
+            "transaction_amount": 34000,
+            "date_created": str(datetime.now),
             "created_by": "John Doe"}
 
     def tearDown(self):
