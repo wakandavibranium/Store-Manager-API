@@ -2,9 +2,10 @@ from flask import request
 from flask_restplus import Resource, Namespace, fields
 
 # Local import
-from .models import ProductModel
+from .models import ProductModel, SaleModel
 
 namespace_1 = Namespace("products", description="End points for products")
+namespace_2 = Namespace("sales", description="End points for sales")
 
 
 @namespace_1.route('/')
@@ -45,3 +46,19 @@ class Product(Resource):
         search_product = ProductModel.get_a_product_by_id(id)
         return {"message": "Product Found",
                 "data": search_product.get_product_details()}, 200
+
+
+@namespace_2.route('/')
+class Sales(Resource):
+    """Get sales and create sales"""
+
+    def get(self):
+        """Get all sales"""
+
+        sales_list = []
+
+        # Loop through all the sales records
+        for s in SaleModel.sales:
+            sales_list.append(s.get_sale_details())
+
+        return {"message": "Success", "data": sales_list}, 200
