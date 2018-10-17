@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime
+import json
 
 # Local import
 from ... import create_app
@@ -32,3 +33,13 @@ class SaleTestCase(unittest.TestCase):
             "/api/v1/sales",
             content_type=self.content_type)
         self.assertEqual(response.status_code, 200)
+
+    def test_add_a_sale(self):
+        """Test that a sale can be added"""
+
+        posted_sale = self.client.post(
+            '/api/v1/sales',
+            data=json.dumps(
+                self.sale),
+            content_type=self.content_type)
+        self.assertEqual(posted_sale.status_code, 201)
