@@ -18,7 +18,7 @@ class ProductTestCase(unittest.TestCase):
             'name': 'Popcorn',
             'category': 'Snacks',
             'quantity': 150,
-            "m_q": 5,
+            "minimum_inventory_quantity": 5,
             'price': 20}
 
     def tearDown(self):
