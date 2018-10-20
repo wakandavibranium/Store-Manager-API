@@ -8,6 +8,7 @@ from .models import ProductModel, SaleModel, UserModel
 namespace_1 = Namespace("products", description="End points for products")
 namespace_2 = Namespace("sales", description="End points for sales")
 namespace_3 = Namespace("auth/signup", description="End points for signup")
+namespace_4 = Namespace("auth/login", description="End point for login")
 
 
 @namespace_1.route('/')
@@ -127,3 +128,33 @@ class Signup(Resource):
             users.append(u.get_user_details())
 
         return {"message": "Success", "data": users}, 200
+
+
+@namespace_4.route('/')
+class Login(Resource):
+    """User Login"""
+
+    def post(self):
+        """Login in a user"""
+
+        data = request.get_json()
+
+        # search the user by email
+        user_record = UserModel.get_a_user_by_email(data['email'])
+
+        # check if the user is already registered
+        if user_record:
+            # Check if the login credentials are valid
+            if user_record.email == data['email'] and user_record.validate_password(
+                    data['password']):
+                # Create a token
+                encode_token = user_record.create_token(data['email'])
+
+                # Decode the token
+                decode_token = encode_token.decode('utf-8')
+
+                return {"status": "Login Successful",
+                        "AuthToken": decode_token}, 200
+            return {"status": "Login Failed!"}, 401
+        elif not user_record:
+            return {"status": "You're not registered!. Please register"}, 403
