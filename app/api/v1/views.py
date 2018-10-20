@@ -1,11 +1,13 @@
+
 from flask import request
 from flask_restplus import Resource, Namespace, fields
 
 # Local import
-from .models import ProductModel, SaleModel
+from .models import ProductModel, SaleModel, UserModel
 
 namespace_1 = Namespace("products", description="End points for products")
 namespace_2 = Namespace("sales", description="End points for sales")
+namespace_3 = Namespace("auth/signup", description="End points for signup")
 
 
 @namespace_1.route('/')
@@ -85,3 +87,43 @@ class Sale(Resource):
         search_sale = SaleModel.get_a_sale_by_id(id)
         return {"message": "Sale Found",
                 "data": search_sale.get_sale_details()}, 200
+
+
+@namespace_3.route('/')
+class Signup(Resource):
+    """The signup resource"""
+
+    def post(self):
+        """Sign up a user"""
+
+        data = request.get_json(force=True)
+
+        # search the user by email
+        user_record = UserModel.get_a_user_by_email(data['email'])
+
+        # check if the user is already registered
+        if user_record:
+            return {"message": "User {} already exists.".format(data['name'])}
+
+        # register the user if he/she doesn't isn't registered
+        if not user_record:
+            signup_user = UserModel(data['name'],
+                                    data['email'],
+                                    data['phone'],
+                                    data['role'],
+                                    data['password'])
+
+            # Add the signed up user
+            UserModel.registered_users.append(signup_user)
+            return {"message": "Sign up was successful"}, 201
+
+    def get(self):
+        """Get signed up users"""
+
+        users = []
+
+        # Loop through the users
+        for u in UserModel.registered_users:
+            users.append(u.get_user_details())
+
+        return {"message": "Success", "data": users}, 200
