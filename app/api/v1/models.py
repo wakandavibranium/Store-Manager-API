@@ -1,3 +1,12 @@
+from flask_bcrypt import Bcrypt
+import jwt
+from datetime import datetime, timedelta
+import os
+
+# Local import
+from app import create_app
+
+
 class ProductModel:
     """The class contains details of a product"""
 
@@ -93,4 +102,72 @@ class SaleModel:
             transaction_amount=self.transaction_amount,
             date_created=self.date_created,
             created_by=self.created_by
+        )
+
+
+class UserModel:
+    """Model for users"""
+
+    user_id = 1
+
+    registered_users = []
+
+    my_secert_key = os.getenv('SECRET_KEY')
+
+    def __init__(self, name, email, phone, role, password):
+        self.id = UserModel.user_id
+        self.name = name
+        self.email = email
+        self.phone = phone
+        self.role = role
+        self.password = Bcrypt().generate_password_hash(password).decode('utf-8')
+
+        # Increment user_id by 1
+        UserModel.user_id += 1
+
+    def validate_password(self, password):
+        """check if the hashed password is the same as the password entered by the user"""
+        return Bcrypt().check_password_hash(self.password, password)
+
+    def create_token(self, email):
+        """ create the access token"""
+
+        try:
+            # create a payload
+            payload = {
+                'exp': datetime.utcnow() + timedelta(minutes=30),
+                'sub': email
+            }
+
+            # create a token using payload and secret key
+            encoded_data = jwt.encode(
+                payload,
+                UserModel.my_secert_key,
+                algorithm='HS256'
+            )
+            return encoded_data
+
+        except Exception as e:
+            # return the error if an exception occurs
+            return str(e)
+
+    @classmethod
+    def get_a_user_by_email(cls, email):
+        """Get one user"""
+
+        # Loop through the list of users
+        for user in cls.registered_users:
+            # Check if the user exists
+            if email == user.email:
+                return user
+
+    def get_user_details(self):
+        """Return the details of the user """
+
+        return dict(
+            id=self.id,
+            name=self.name,
+            email=self.email,
+            phone=self.phone,
+            role=self.role
         )
