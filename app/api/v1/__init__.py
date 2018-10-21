@@ -1,5 +1,6 @@
 from flask import Blueprint
 from flask_restplus import Api
+from .utils import authorizations
 
 # Local import
 from .views import namespace_1 as n1
@@ -9,7 +10,7 @@ from .views import namespace_4 as n4
 
 # create a blueprint
 app_version1 = Blueprint("v1", __name__, url_prefix="/api/v1")
-api_version1 = Api(app_version1)
+api_version1 = Api(app_version1, authorizations=authorizations)
 
 # Add namespaces
 api_version1.add_namespace(n1, path='/products')
