@@ -2,19 +2,50 @@
 from flask import request
 from flask_restplus import Resource, Namespace, fields
 
-# Local import
+# Local imports
 from .models import ProductModel, SaleModel, UserModel
+from .utils import requires_token
 
 namespace_1 = Namespace("products", description="End points for products")
 namespace_2 = Namespace("sales", description="End points for sales")
 namespace_3 = Namespace("auth/signup", description="End points for signup")
 namespace_4 = Namespace("auth/login", description="End point for login")
 
+product = namespace_1.model('Products', {
+    "name": fields.String(required=True, description="Product name"),
+    "category": fields.String(required=True, description="Product category"),
+    "quantity": fields.Integer(required=True, description="Quantity"),
+    "minimum_inventory_quantity": fields.Integer(description="Mininum Inventory Quantity"),
+    "price": fields.Integer(required=True, description="Price")
+})
+
+sale = namespace_2.model('Sales', {
+    'number_of_items_sold': fields.String(required=True, description="No. of items sold"),
+    'transaction_amount': fields.String(required=True, description="Transaction Amount"),
+    'date_created': fields.String(required=True, description="Date sale was created"),
+    'created_by': fields.String(required=True, description="User who created sale")
+})
+
+user = namespace_3.model('User Registration', {
+    'name': fields.String(required=True, description="Your name"),
+    'email': fields.String(required=True, description="Your email"),
+    'phone': fields.String(required=True, description="Phone number"),
+    'role': fields.String(required=True, description="Your role"),
+    'password': fields.String(required=True, description="Enter password")
+})
+
+user_login = namespace_4.model('User Login', {
+    'email': fields.String(required=True, description="Your email"),
+    'password': fields.String(required=True, description="Your password")
+})
+
 
 @namespace_1.route('/')
 class Products(Resource):
     """Get products and create products"""
 
+    @namespace_1.doc(security='apikey')
+    @requires_token
     def get(self):
         """Get all products"""
 
@@ -26,6 +57,9 @@ class Products(Resource):
 
         return {"message": "Success", "data": products_list}, 200
 
+    @namespace_1.doc(security='apikey')
+    @namespace_1.expect(product)
+    @requires_token
     def post(self):
         """Add a product"""
 
@@ -43,8 +77,11 @@ class Products(Resource):
 
 @namespace_1.route('/<int:id>')
 class Product(Resource):
+
+    @namespace_1.doc(security='apikey')
+    @requires_token
     def get(self, id):
-        """Get one product"""
+        """Get a product by id"""
 
         search_product = ProductModel.get_a_product_by_id(id)
         return {"message": "Product Found",
@@ -55,6 +92,8 @@ class Product(Resource):
 class Sales(Resource):
     """Get sales and create sales"""
 
+    @namespace_2.doc(security='apikey')
+    @requires_token
     def get(self):
         """Get all sales"""
 
@@ -66,6 +105,9 @@ class Sales(Resource):
 
         return {"message": "Success", "data": sales_list}, 200
 
+    @namespace_2.doc(security='apikey')
+    @namespace_2.expect(sale)
+    @requires_token
     def post(self):
         """Add a sale"""
 
@@ -82,6 +124,9 @@ class Sales(Resource):
 
 @namespace_2.route('/<int:id>')
 class Sale(Resource):
+
+    @namespace_2.doc(security='apikey')
+    @requires_token
     def get(self, id):
         """Get one sale"""
 
@@ -94,6 +139,9 @@ class Sale(Resource):
 class Signup(Resource):
     """The signup resource"""
 
+    @namespace_3.doc(security='apikey')
+    @namespace_3.expect(user)
+    @requires_token
     def post(self):
         """Sign up a user"""
 
@@ -118,6 +166,8 @@ class Signup(Resource):
             UserModel.registered_users.append(signup_user)
             return {"message": "Sign up was successful"}, 201
 
+    @namespace_3.doc(security='apikey')
+    @requires_token
     def get(self):
         """Get signed up users"""
 
@@ -134,6 +184,9 @@ class Signup(Resource):
 class Login(Resource):
     """User Login"""
 
+    @namespace_4.doc(security='apikey')
+    @namespace_4.expect(user_login)
+    @requires_token
     def post(self):
         """Login in a user"""
 
@@ -147,14 +200,7 @@ class Login(Resource):
             # Check if the login credentials are valid
             if user_record.email == data['email'] and user_record.validate_password(
                     data['password']):
-                # Create a token
-                encode_token = user_record.create_token(data['email'])
-
-                # Decode the token
-                decode_token = encode_token.decode('utf-8')
-
-                return {"status": "Login Successful",
-                        "AuthToken": decode_token}, 200
-            return {"status": "Login Failed!"}, 401
+                return {"message": "Login Successful"}, 200
+            return {"message": "Login Failed!"}, 401
         elif not user_record:
-            return {"status": "You're not registered!. Please register"}, 403
+            return {"message": "You are not registered!. Please register"}, 403
