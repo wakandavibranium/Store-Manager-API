@@ -199,7 +199,7 @@ class Login(Resource):
             # Check if the login credentials are valid
             if user_record.email == data['email'] and user_record.validate_password(
                     data['password']):
-                return {"message": "Login Successful"}, 200
+                return {"message": "Login Successful"}, 201
             return {"message": "Login Failed!"}, 401
         elif not user_record:
             return {"message": "You are not registered!. Please register"}, 403
