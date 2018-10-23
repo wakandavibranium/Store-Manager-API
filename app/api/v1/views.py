@@ -4,7 +4,6 @@ from flask_restplus import Resource, Namespace, fields
 
 # Local imports
 from .models import ProductModel, SaleModel, UserModel
-from .utils import requires_token
 
 namespace_1 = Namespace("products", description="End points for products")
 namespace_2 = Namespace("sales", description="End points for sales")
@@ -20,8 +19,8 @@ product = namespace_1.model('Products', {
 })
 
 sale = namespace_2.model('Sales', {
-    'number_of_items_sold': fields.String(required=True, description="No. of items sold"),
-    'transaction_amount': fields.String(required=True, description="Transaction Amount"),
+    'number_of_items_sold': fields.Integer(required=True, description="No. of items sold"),
+    'transaction_amount': fields.Integer(required=True, description="Transaction Amount"),
     'date_created': fields.String(required=True, description="Date sale was created"),
     'created_by': fields.String(required=True, description="User who created sale")
 })
@@ -29,7 +28,7 @@ sale = namespace_2.model('Sales', {
 user = namespace_3.model('User Registration', {
     'name': fields.String(required=True, description="Your name"),
     'email': fields.String(required=True, description="Your email"),
-    'phone': fields.String(required=True, description="Phone number"),
+    'phone': fields.Integer(required=True, description="Phone number"),
     'role': fields.String(required=True, description="Your role"),
     'password': fields.String(required=True, description="Enter password")
 })
@@ -44,26 +43,26 @@ user_login = namespace_4.model('User Login', {
 class Products(Resource):
     """Get products and create products"""
 
-    @namespace_1.doc(security='apikey')
-    @requires_token
     def get(self):
         """Get all products"""
 
         products_list = []
 
-        # Loop through all the products
-        for p in ProductModel.products:
-            products_list.append(p.get_product_details())
+        # Check if the products list has a record
+        if len(ProductModel.products) > 0:
+            # Loop through all the products
+            for p in ProductModel.products:
+                products_list.append(p.get_product_details())
+            return {"Message": "Success", "data": products_list}, 200
+        else:
+            return {"Message": "No products were found"}, 404
 
-        return {"message": "Success", "data": products_list}, 200
-
-    @namespace_1.doc(security='apikey')
     @namespace_1.expect(product)
-    @requires_token
     def post(self):
         """Add a product"""
 
         data = request.get_json(force=True)
+
         add_product = ProductModel(data['name'],
                                    data['category'],
                                    data['quantity'],
@@ -78,36 +77,37 @@ class Products(Resource):
 @namespace_1.route('/<int:id>')
 class Product(Resource):
 
-    @namespace_1.doc(security='apikey')
-    @requires_token
     def get(self, id):
         """Get a product by id"""
 
         search_product = ProductModel.get_a_product_by_id(id)
-        return {"message": "Product Found",
-                "data": search_product.get_product_details()}, 200
+
+        # Check if there is a product
+        if search_product:
+            return {"Product": search_product.get_product_details()}, 200
+        elif not search_product:
+            return {"Message": "Product not found"}, 404
 
 
 @namespace_2.route('/')
 class Sales(Resource):
     """Get sales and create sales"""
 
-    @namespace_2.doc(security='apikey')
-    @requires_token
     def get(self):
         """Get all sales"""
 
         sales_list = []
 
-        # Loop through all the sales records
-        for s in SaleModel.sales:
-            sales_list.append(s.get_sale_details())
+        # Check if the sales list has a record
+        if len(SaleModel.sales) > 0:
+            # Loop through all the sales records
+            for s in SaleModel.sales:
+                sales_list.append(s.get_sale_details())
+            return {"Message": "Success", "data": sales_list}, 200
+        else:
+            return {"Message": "No sales were found"}, 404
 
-        return {"message": "Success", "data": sales_list}, 200
-
-    @namespace_2.doc(security='apikey')
     @namespace_2.expect(sale)
-    @requires_token
     def post(self):
         """Add a sale"""
 
@@ -119,29 +119,29 @@ class Sales(Resource):
 
         # Add the sale to the sales list
         SaleModel.sales.append(add_sale)
-        return{"message": "Sale has been added", "data": add_sale.get_sale_details()}, 201
+        return{"Message": "Sale has been added", "data": add_sale.get_sale_details()}, 201
 
 
 @namespace_2.route('/<int:id>')
 class Sale(Resource):
 
-    @namespace_2.doc(security='apikey')
-    @requires_token
     def get(self, id):
         """Get one sale"""
 
+        # search a sale record by id
         search_sale = SaleModel.get_a_sale_by_id(id)
-        return {"message": "Sale Found",
-                "data": search_sale.get_sale_details()}, 200
+
+        if search_sale:
+            return {"Sale": search_sale.get_sale_details()}, 200
+        elif not search_sale:
+            return {"Message": "Sale not found"}, 404
 
 
 @namespace_3.route('/')
 class Signup(Resource):
     """The signup resource"""
 
-    @namespace_3.doc(security='apikey')
     @namespace_3.expect(user)
-    @requires_token
     def post(self):
         """Sign up a user"""
 
@@ -154,7 +154,7 @@ class Signup(Resource):
         if user_record:
             return {"message": "User {} already exists.".format(data['name'])}
 
-        # register the user if he/she doesn't isn't registered
+        # register the user if he/she isn't registered
         if not user_record:
             signup_user = UserModel(data['name'],
                                     data['email'],
@@ -166,27 +166,26 @@ class Signup(Resource):
             UserModel.registered_users.append(signup_user)
             return {"message": "Sign up was successful"}, 201
 
-    @namespace_3.doc(security='apikey')
-    @requires_token
     def get(self):
         """Get signed up users"""
 
         users = []
 
-        # Loop through the users
-        for u in UserModel.registered_users:
-            users.append(u.get_user_details())
-
-        return {"message": "Success", "data": users}, 200
+        # Check if the sales list has a record
+        if len(UserModel.registered_users) > 0:
+            # Loop through the users
+            for u in UserModel.registered_users:
+                users.append(u.get_user_details())
+            return {"message": "Success", "data": users}, 200
+        else:
+            return {"Message": "No Users were found"}, 404
 
 
 @namespace_4.route('/')
 class Login(Resource):
     """User Login"""
 
-    @namespace_4.doc(security='apikey')
     @namespace_4.expect(user_login)
-    @requires_token
     def post(self):
         """Login in a user"""
 
