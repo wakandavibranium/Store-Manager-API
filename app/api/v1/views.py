@@ -21,3 +21,17 @@ class Products(Resource):
             products_list.append(p.get_product_details())
 
         return {"message": "Success", "data": products_list}, 200
+
+    def post(self):
+        """Add a product"""
+
+        data = request.get_json(force=True)
+        add_product = ProductModel(data['name'],
+                                   data['category'],
+                                   data['quantity'],
+                                   data['minimum_inventory_quantity'],
+                                   data['price'])
+
+        # Add the product to the products list
+        ProductModel.products.append(add_product)
+        return{"message": "Product has been added", "data": add_product.get_product_details()}, 201
