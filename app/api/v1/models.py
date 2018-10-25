@@ -1,7 +1,4 @@
 from flask_bcrypt import Bcrypt
-import jwt
-from datetime import datetime, timedelta
-import os
 
 # Local import
 from app import create_app
@@ -112,8 +109,6 @@ class UserModel:
 
     registered_users = []
 
-    my_secert_key = os.getenv('SECRET_KEY')
-
     def __init__(self, name, email, phone, role, password):
         self.id = UserModel.user_id
         self.name = name
@@ -128,28 +123,6 @@ class UserModel:
     def validate_password(self, password):
         """check if the hashed password is the same as the password entered by the user"""
         return Bcrypt().check_password_hash(self.password, password)
-
-    def create_token(self, email):
-        """ create the access token"""
-
-        try:
-            # create a payload
-            payload = {
-                'exp': datetime.utcnow() + timedelta(minutes=30),
-                'sub': email
-            }
-
-            # create a token using payload and secret key
-            encoded_data = jwt.encode(
-                payload,
-                UserModel.my_secert_key,
-                algorithm='HS256'
-            )
-            return encoded_data
-
-        except Exception as e:
-            # return the error if an exception occurs
-            return str(e)
 
     @classmethod
     def get_a_user_by_email(cls, email):
