@@ -51,10 +51,6 @@ coverage.xml
 *.mo
 *.pot
 
-# Flask stuff:
-instance/
-.webassets-cache
-
 # PyBuilder
 target/
 
