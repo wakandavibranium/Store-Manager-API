@@ -43,3 +43,11 @@ class SaleTestCase(unittest.TestCase):
                 self.sale),
             content_type=self.content_type)
         self.assertEqual(posted_sale.status_code, 201)
+
+    def test_user_can_get_sale_record_by_id(self):
+        """Test user can get a sale by id"""
+
+        response = self.client.get(
+            "/api/v1/sales/1",
+            content_type=self.content_type)
+        self.assertEqual(response.status_code, 200)
