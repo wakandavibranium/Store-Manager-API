@@ -62,3 +62,16 @@ class Sales(Resource):
             sales_list.append(s.get_sale_details())
 
         return {"message": "Success", "data": sales_list}, 200
+
+    def post(self):
+        """Add a sale"""
+
+        data = request.get_json(force=True)
+        add_sale = SaleModel(data['number_of_items_sold'],
+                             data['transaction_amount'],
+                             data['date_created'],
+                             data['created_by'])
+
+        # Add the sale to the sales list
+        SaleModel.sales.append(add_sale)
+        return{"message": "Sale has been added", "data": add_sale.get_sale_details()}, 201
