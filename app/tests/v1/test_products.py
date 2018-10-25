@@ -1,5 +1,7 @@
 import unittest
+import json
 
+# Local import
 from ... import create_app
 
 
@@ -31,3 +33,13 @@ class ProductTestCase(unittest.TestCase):
             "/api/v1/products",
             content_type=self.content_type)
         self.assertEqual(response.status_code, 200)
+
+    def test_add_a_product(self):
+        """Test that a product can be added"""
+
+        posted_product = self.client.post(
+            '/api/v1/products',
+            data=json.dumps(
+                self.product),
+            content_type=self.content_type)
+        self.assertEqual(posted_product.status_code, 201)
