@@ -43,3 +43,11 @@ class ProductTestCase(unittest.TestCase):
                 self.product),
             content_type=self.content_type)
         self.assertEqual(posted_product.status_code, 201)
+
+    def test_user_can_get_product_by_id(self):
+        """Test user can get a product by id"""
+
+        response = self.client.get(
+            "/api/v1/products/1",
+            content_type=self.content_type)
+        self.assertEqual(response.status_code, 200)
