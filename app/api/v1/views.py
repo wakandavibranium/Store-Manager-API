@@ -75,3 +75,13 @@ class Sales(Resource):
         # Add the sale to the sales list
         SaleModel.sales.append(add_sale)
         return{"message": "Sale has been added", "data": add_sale.get_sale_details()}, 201
+
+
+@namespace_2.route('/<int:id>')
+class Sale(Resource):
+    def get(self, id):
+        """Get one sale"""
+
+        search_sale = SaleModel.get_a_sale_by_id(id)
+        return {"message": "Sale Found",
+                "data": search_sale.get_sale_details()}, 200

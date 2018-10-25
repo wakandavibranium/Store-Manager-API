@@ -74,6 +74,16 @@ class SaleModel:
         # Increment sale_id by 1 every time this class is instantiated
         SaleModel.sale_id += 1
 
+    @classmethod
+    def get_a_sale_by_id(cls, id):
+        """Get a single sale"""
+
+        # Loop through the list of sales
+        for sale in cls.sales:
+            # Check if the sale id supplied exists
+            if id == sale.id:
+                return sale
+
     def get_sale_details(self):
         """Return the sale as a dictionary"""
 
