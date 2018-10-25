@@ -35,3 +35,13 @@ class Products(Resource):
         # Add the product to the products list
         ProductModel.products.append(add_product)
         return{"message": "Product has been added", "data": add_product.get_product_details()}, 201
+
+
+@namespace_1.route('/<int:id>')
+class Product(Resource):
+    def get(self, id):
+        """Get one product"""
+
+        search_product = ProductModel.get_a_product_by_id(id)
+        return {"message": "Product Found",
+                "data": search_product.get_product_details()}, 200
