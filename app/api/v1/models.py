@@ -1,4 +1,5 @@
 from flask_bcrypt import Bcrypt
+from datetime import datetime
 
 # Local import
 from app import create_app
@@ -63,18 +64,21 @@ class SaleModel:
     # list of sales
     sales = []
 
+    # Get current timestamp
+    time = datetime.now()
+    current_timestamp = time.strftime("%c")
+
     def __init__(
             self,
             number_of_items_sold,
             transaction_amount,
-            date_created,
             created_by):
         """Initialize class constructor with sales details"""
 
         self.id = SaleModel.sale_id
         self.number_of_items_sold = number_of_items_sold
         self.transaction_amount = transaction_amount
-        self.date_created = date_created
+        self.date_created = SaleModel.current_timestamp
         self.created_by = created_by
 
         # Increment sale_id by 1 every time this class is instantiated
