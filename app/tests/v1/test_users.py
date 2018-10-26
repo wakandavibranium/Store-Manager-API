@@ -18,7 +18,7 @@ class UsersTestCase(unittest.TestCase):
         self.users = {
             "name": "John Doe",
             "email": "johndoe@gmail.com",
-            "phone": "0722123456",
+            "phone": 722123456,
             "role": "John Doe",
             "password": "12345"}
 
@@ -55,7 +55,9 @@ class UsersTestCase(unittest.TestCase):
             data=json.dumps(
                 self.users),
             content_type=self.content_type)
+        data = json.loads(response.get_data().decode('UTF-8'))
         self.assertEqual(response.status_code, 201)
+        self.assertEqual(data, {"message": "Sign up was successful"})
 
     def test_user_can_login(self):
         """Test user can login"""
@@ -71,4 +73,114 @@ class UsersTestCase(unittest.TestCase):
             data=json.dumps(
                 self.user_login),
             content_type=self.content_type)
+        data = json.loads(response.get_data().decode('UTF-8'))
         self.assertEqual(response.status_code, 201)
+        self.assertEqual(data, {"message": "Login Successful"})
+
+    def test_for_invalid_email(self):
+        """Test if email is invalid"""
+
+        payload = {
+            "name": "John Doe",
+            "email": "johndoe",
+            "phone": 722123456,
+            "role": "John Doe",
+            "password": "12345"}
+
+        response = self.client.post(
+            '/api/v1/auth/signup',
+            content_type=self.content_type,
+            data=json.dumps(payload))
+        data = json.loads(response.get_data().decode('UTF-8'))
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data, {"message": "This email is invalid!"})
+
+    def test_if_name_is_blank(self):
+        """Test if name is blank"""
+
+        payload = {
+            "name": "",
+            "email": "johndoe",
+            "phone": 722123456,
+            "role": "admin",
+            "password": "12345"}
+
+        response = self.client.post(
+            '/api/v1/auth/signup',
+            content_type=self.content_type,
+            data=json.dumps(payload))
+        data = json.loads(response.get_data().decode('UTF-8'))
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data, {"message": "Name is required"})
+
+    def test_if_email_is_blank(self):
+        """Test if email is blank"""
+
+        payload = {
+            "name": "John Doe",
+            "email": "",
+            "phone": 722123456,
+            "role": "admin",
+            "password": "12345"}
+
+        response = self.client.post(
+            '/api/v1/auth/signup',
+            content_type=self.content_type,
+            data=json.dumps(payload))
+        data = json.loads(response.get_data().decode('UTF-8'))
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data, {"message": "Email is required"})
+
+    def test_if_phone_is_blank(self):
+        """Test if phone is blank"""
+
+        payload = {
+            "name": "John Doe",
+            "email": "johndoe@gmail.com",
+            "phone": "",
+            "role": "admin",
+            "password": "12345"}
+
+        response = self.client.post(
+            '/api/v1/auth/signup',
+            content_type=self.content_type,
+            data=json.dumps(payload))
+        data = json.loads(response.get_data().decode('UTF-8'))
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data, {"message": "Phone no. is required"})
+
+    def test_if_role_is_blank(self):
+        """Test if role is blank"""
+
+        payload = {
+            "name": "John Doe",
+            "email": "johndoe@gmail.com",
+            "phone": 723123456,
+            "role": "",
+            "password": "12345"}
+
+        response = self.client.post(
+            '/api/v1/auth/signup',
+            content_type=self.content_type,
+            data=json.dumps(payload))
+        data = json.loads(response.get_data().decode('UTF-8'))
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data, {"message": "Role is required"})
+
+    def test_if_password_is_blank(self):
+        """Test if password is blank"""
+
+        payload = {
+            "name": "John Doe",
+            "email": "johndoe@gmail.com",
+            "phone": 723123456,
+            "role": "admin",
+            "password": ""}
+
+        response = self.client.post(
+            '/api/v1/auth/signup',
+            content_type=self.content_type,
+            data=json.dumps(payload))
+        data = json.loads(response.get_data().decode('UTF-8'))
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data, {"message": "Password is required"})
