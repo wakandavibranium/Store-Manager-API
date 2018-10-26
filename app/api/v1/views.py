@@ -1,6 +1,7 @@
 
 from flask import request
 from flask_restplus import Resource, Namespace, fields
+from .utils import validate_registration, validate_email, validate_product
 
 # Local imports
 from .models import ProductModel, SaleModel, UserModel
@@ -53,7 +54,7 @@ class Products(Resource):
             # Loop through all the products
             for p in ProductModel.products:
                 products_list.append(p.get_product_details())
-            return {"Message": "Success", "data": products_list}, 200
+            return {"Message": "Product Found", "data": products_list}, 200
         else:
             return {"Message": "No products were found"}, 404
 
@@ -63,6 +64,9 @@ class Products(Resource):
 
         data = request.get_json(force=True)
 
+        if validate_product(data):
+            return validate_product(data)
+
         add_product = ProductModel(data['name'],
                                    data['category'],
                                    data['quantity'],
@@ -71,7 +75,7 @@ class Products(Resource):
 
         # Add the product to the products list
         ProductModel.products.append(add_product)
-        return{"message": "Product has been added", "data": add_product.get_product_details()}, 201
+        return{"message": "Product has been added"}, 201
 
 
 @namespace_1.route('/<int:id>')
@@ -146,6 +150,12 @@ class Signup(Resource):
         """Sign up a user"""
 
         data = request.get_json(force=True)
+
+        if validate_registration(data):
+            return validate_registration(data)
+
+        if validate_email(data['email']):
+            return {"message": "This email is invalid!"}, 401
 
         # search the user by email
         user_record = UserModel.get_a_user_by_email(data['email'])
