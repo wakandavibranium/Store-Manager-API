@@ -53,3 +53,18 @@ def validate_product(data):
         return {"Message": "Minimum Quantity must be an integer"}, 401
     if not isinstance(data['price'], int):
         return {"Message": "Price must be an integer"}, 401
+
+
+def validate_sale(data):
+    """Validate creating a sale"""
+
+    if not data["number_of_items_sold"] or data["number_of_items_sold"] == " ":
+        return {"message": "No. of items sold is required"}, 401
+    if not isinstance(data['number_of_items_sold'], int):
+        return {"message": "No. of items sold must be an integer"}, 401
+    if not data["transaction_amount"] or data["transaction_amount"] == " ":
+        return {"message": "Transaction amount is required"}, 401
+    if not isinstance(data['transaction_amount'], int):
+        return {"message": "Transaction amount must be an integer"}, 401
+    if len(data["created_by"]) == 0 or data["created_by"] == " ":
+        return {"message": "Created by field is required"}, 401

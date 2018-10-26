@@ -1,7 +1,7 @@
 
 from flask import request
 from flask_restplus import Resource, Namespace, fields
-from .utils import validate_registration, validate_email, validate_product
+from .utils import validate_registration, validate_email, validate_product, validate_sale
 
 # Local imports
 from .models import ProductModel, SaleModel, UserModel
@@ -11,18 +11,18 @@ namespace_2 = Namespace("sales", description="End points for sales")
 namespace_3 = Namespace("auth/signup", description="End points for signup")
 namespace_4 = Namespace("auth/login", description="End point for login")
 
-product = namespace_1.model('Products', {
-    "name": fields.String(required=True, description="Product name"),
-    "category": fields.String(required=True, description="Product category"),
-    "quantity": fields.Integer(required=True, description="Quantity"),
-    "minimum_inventory_quantity": fields.Integer(description="Mininum Inventory Quantity"),
-    "price": fields.Integer(required=True, description="Price")
-})
+product = namespace_1.model(
+    'Products', {
+        "name": fields.String(
+            required=True, description="Product name"), "category": fields.String(
+                required=True, description="Product category"), "quantity": fields.Integer(
+                    required=True, description="Quantity"), "minimum_inventory_quantity": fields.Integer(
+                        required=True, description="Mininum Inventory Quantity"), "price": fields.Integer(
+                            required=True, description="Price")})
 
 sale = namespace_2.model('Sales', {
     'number_of_items_sold': fields.Integer(required=True, description="No. of items sold"),
     'transaction_amount': fields.Integer(required=True, description="Transaction Amount"),
-    'date_created': fields.String(required=True, description="Date sale was created"),
     'created_by': fields.String(required=True, description="User who created sale")
 })
 
@@ -116,14 +116,18 @@ class Sales(Resource):
         """Add a sale"""
 
         data = request.get_json(force=True)
+
+        # Validate sale record
+        if validate_sale(data):
+            return validate_sale(data)
+
         add_sale = SaleModel(data['number_of_items_sold'],
                              data['transaction_amount'],
-                             data['date_created'],
                              data['created_by'])
 
         # Add the sale to the sales list
         SaleModel.sales.append(add_sale)
-        return{"Message": "Sale has been added", "data": add_sale.get_sale_details()}, 201
+        return {"Message": "Sale has been added"}, 201
 
 
 @namespace_2.route('/<int:id>')
